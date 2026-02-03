@@ -1,39 +1,44 @@
+require("dotenv").config();
 const express = require("express");
 const nodemailer = require("nodemailer");
 
 const app = express();
 app.use(express.static("public"));
 
+console.log(" Starting server...");
+
+// Transporter
 const transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 465,
     secure: true,
     auth: {
-        user: "riteshpatidar.test@gmail.com",
-        pass: "pfytewklzzamwlma"
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
     }
 });
 
-// SMTP verification
-transporter.verify((error, success) => {
+// Verify SMTP
+transporter.verify((error) => {
     if (error) {
         console.error(" SMTP VERIFY FAILED");
         console.error(error);
     } else {
-        console.log(" SMTP SERVER IS READY");
+        console.log("SMTP SERVER IS READY");
     }
 });
 
 app.get("/send-mail", async (req, res) => {
 
     try {
-        const link = "http://localhost:3000/valentine.html";
+        const link = `${process.env.APP_BASE_URL}/valentine.html`;
         console.log("🔗 Valentine link created:", link);
 
         const mailOptions = {
-            from: `"Secret Valentine 💌" <ritesh.patidar.test@gmail.com>`,
-            to: "rit9171122814@gmail.com",
-            subject: "I have something to ask you ❤️",
+            from: `"${process.env.EMAIL_FROM_NAME}" <${process.env.EMAIL_USER}>`,
+            to: process.env.EMAIL_TO,
+            subject: "A small question for you",
+            text: `Hey! I have a small question 😊\n${link}`,
             html: `
                 <h2>Hey 👀</h2>
                 <p>I have a small question for you...</p>
@@ -43,21 +48,21 @@ app.get("/send-mail", async (req, res) => {
             `
         };
 
-
+        console.log("Sending mail...");
         const info = await transporter.sendMail(mailOptions);
 
-
-        res.send("Mail sent successfully!");
+        console.log("Mail sent:", info.messageId);
+        res.send(" Mail sent successfully!");
 
     } catch (error) {
         console.error("MAIL SENDING FAILED");
-        console.error("Error message:", error.message);
-        console.error("Full error:", error);
+        console.error("Message:", error.message);
+        console.error(error);
 
         res.status(500).send("Mail sending failed. Check console.");
     }
 });
 
-app.listen(3000, () => {
-    console.log("Server running on http://localhost:3000");
+app.listen(process.env.PORT || 3000, () => {
+    console.log(` Server running on http://localhost:${process.env.PORT || 3000}`);
 });
