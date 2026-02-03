@@ -4,7 +4,7 @@
     "description": "Valentine Yes No App",
     "main": "server.js",
     "scripts": {
-        "start": "node server.js"
+        "start": "server.js"
     },
     "dependencies": {
         "dotenv": "^17.2.3",
